@@ -74,8 +74,16 @@ class _FilmPageState extends State<FilmPage> {
   }
 
   Future<void> _deleteFilm(Film film) async {
-    final response = await http.delete(Uri.parse(
-        'https://rio-api-movie-flutter.vercel.app/deleteMovies/${film.id}'));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('idToken');
+    print("Token : ${token}");
+    final response = await http.delete(
+      Uri.parse(
+          'https://rio-api-movie-flutter.vercel.app/deleteMovie/${film.id}'),
+      headers: <String, String>{
+        'Cookie': 'authToken=$token',
+      },
+    );
 
     if (response.statusCode == 200) {
       setState(() {
