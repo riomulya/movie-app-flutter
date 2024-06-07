@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:film_app/models/film.dart';
 import 'package:film_app/ui/film_detail.dart';
