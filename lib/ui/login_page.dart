@@ -15,8 +15,13 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailTextboxController = TextEditingController();
   final _passwordTextboxController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> _login(String email, String password) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final response = await http.post(
         Uri.parse('https://rio-api-movie-flutter.vercel.app/login'),
@@ -48,6 +53,10 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       print('Error: $e');
       _showErrorDialog('An error occurred');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -75,22 +84,33 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: const Text('Login'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                _emailTextField(),
-                _passwordTextField(),
-                _buttonLogin(),
-                const SizedBox(height: 30),
-                _menuRegistrasi(),
-              ],
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _emailTextField(),
+                    _passwordTextField(),
+                    _buttonLogin(),
+                    const SizedBox(height: 30),
+                    _menuRegistrasi(),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
     );
   }

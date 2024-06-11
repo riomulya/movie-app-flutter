@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:film_app/models/film.dart';
 import 'package:film_app/ui/film_detail.dart';
@@ -21,6 +19,7 @@ class _FilmPageState extends State<FilmPage> {
   late List<Film> _films = [];
   late List<Film> _filteredFilms = [];
   final TextEditingController _searchController = TextEditingController();
+  bool _isLoading = false; // Tambahkan variabel _isLoading
 
   @override
   void initState() {
@@ -29,6 +28,10 @@ class _FilmPageState extends State<FilmPage> {
   }
 
   Future<void> _fetchFilms() async {
+    setState(() {
+      _isLoading = true; // Set _isLoading ke true saat mulai fetch
+    });
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('idToken');
@@ -70,10 +73,18 @@ class _FilmPageState extends State<FilmPage> {
       }
     } catch (e) {
       print('Error fetching films: $e');
+    } finally {
+      setState(() {
+        _isLoading = false; // Set _isLoading ke false setelah fetch selesai
+      });
     }
   }
 
   Future<void> _deleteFilm(Film film) async {
+    setState(() {
+      _isLoading = true; // Set _isLoading ke true saat mulai delete
+    });
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('idToken');
     print("Token : ${token}");
@@ -93,9 +104,16 @@ class _FilmPageState extends State<FilmPage> {
     } else {
       throw Exception('Failed to delete film');
     }
+    setState(() {
+      _isLoading = false; // Set _isLoading ke false setelah delete selesai
+    });
   }
 
   Future<void> _addFilm(Film film) async {
+    setState(() {
+      _isLoading = true; // Set _isLoading ke true saat mulai add
+    });
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('idToken');
     final response = await http.post(
@@ -121,9 +139,16 @@ class _FilmPageState extends State<FilmPage> {
     } else {
       throw Exception('Failed to add film');
     }
+    setState(() {
+      _isLoading = false; // Set _isLoading ke false setelah add selesai
+    });
   }
 
   Future<void> _editFilm(Film film) async {
+    setState(() {
+      _isLoading = true; // Set _isLoading ke true saat mulai edit
+    });
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('idToken');
     // print("Token : ${token}");
@@ -158,6 +183,9 @@ class _FilmPageState extends State<FilmPage> {
     } else {
       throw Exception('Failed to edit film');
     }
+    setState(() {
+      _isLoading = false; // Set _isLoading ke false setelah edit selesai
+    });
   }
 
   @override
@@ -189,23 +217,28 @@ class _FilmPageState extends State<FilmPage> {
         ],
       ),
       drawer: const AppDrawer(),
-      body: Column(
-        children: [
-          _buildSearchBar(),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredFilms.length,
-              itemBuilder: (context, index) {
-                return ItemFilm(
-                  film: _filteredFilms[index],
-                  onDelete: () => _deleteFilm(_filteredFilms[index]),
-                  onEdit: _editFilm,
-                );
-              },
+      body: _isLoading
+          ? Center(
+              child:
+                  CircularProgressIndicator(), // Menampilkan loading animation saat _isLoading true
+            )
+          : Column(
+              children: [
+                _buildSearchBar(),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _filteredFilms.length,
+                    itemBuilder: (context, index) {
+                      return ItemFilm(
+                        film: _filteredFilms[index],
+                        onDelete: () => _deleteFilm(_filteredFilms[index]),
+                        onEdit: _editFilm,
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
