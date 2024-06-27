@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'registrasi_page.dart'; // Pastikan import RegistrasiPage.dart sudah benar
+import 'registrasi_page.dart'; // Ensure this import is correct
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -15,13 +15,8 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailTextboxController = TextEditingController();
   final _passwordTextboxController = TextEditingController();
-  bool _isLoading = false;
 
   Future<void> _login(String email, String password) async {
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       final response = await http.post(
         Uri.parse('https://rio-api-movie-flutter.vercel.app/login'),
@@ -42,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
         if (idToken != null) {
           final prefs = await SharedPreferences.getInstance();
           prefs.setString('idToken', idToken);
+          prefs.setString('email', email);
           Navigator.pushReplacementNamed(context, '/films');
         } else {
           _showErrorDialog('Login failed: Token not found');
@@ -53,10 +49,6 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       print('Error: $e');
       _showErrorDialog('An error occurred');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -81,35 +73,56 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    _emailTextField(),
-                    _passwordTextField(),
-                    _buttonLogin(),
-                    const SizedBox(height: 30),
-                    _menuRegistrasi(),
-                  ],
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF2193b0), Color(0xFF6dd5ed)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  elevation: 8.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _emailTextField(),
+                          const SizedBox(height: 10),
+                          _passwordTextField(),
+                          const SizedBox(height: 20),
+                          _buttonLogin(),
+                          const SizedBox(height: 20),
+                          _menuRegistrasi(),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
         ],
       ),
     );
@@ -117,7 +130,15 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _emailTextField() {
     return TextFormField(
-      decoration: const InputDecoration(labelText: 'Email'),
+      decoration: InputDecoration(
+        labelText: 'Email',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        prefixIcon: Icon(Icons.email),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
       keyboardType: TextInputType.emailAddress,
       controller: _emailTextboxController,
       validator: (value) {
@@ -131,7 +152,15 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _passwordTextField() {
     return TextFormField(
-      decoration: const InputDecoration(labelText: 'Password'),
+      decoration: InputDecoration(
+        labelText: 'Password',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        prefixIcon: Icon(Icons.lock),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
       keyboardType: TextInputType.text,
       obscureText: true,
       controller: _passwordTextboxController,
@@ -147,7 +176,15 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buttonLogin() {
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+        backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF2193b0)),
+        padding: MaterialStateProperty.all<EdgeInsets>(
+          EdgeInsets.symmetric(horizontal: 50.0, vertical: 15.0),
+        ),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
       ),
       child: const Text('Login', style: TextStyle(color: Colors.white)),
       onPressed: () {
@@ -164,7 +201,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget _menuRegistrasi() {
     return Center(
       child: InkWell(
-        child: const Text('Registrasi', style: TextStyle(color: Colors.blue)),
+        child: const Text(
+          'Registrasi',
+          style: TextStyle(color: Color(0xFF2193b0), fontSize: 16.0),
+        ),
         onTap: () {
           Navigator.push(
             context,

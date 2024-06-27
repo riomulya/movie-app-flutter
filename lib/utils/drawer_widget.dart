@@ -1,13 +1,35 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:film_app/ui/film_page.dart'; // Import necessary screens
-import 'package:film_app/ui/film_form.dart';
-import 'package:film_app/ui/login_page.dart'; // Import the login page
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AppDrawer extends StatelessWidget {
-  const AppDrawer({Key? key}) : super(key: key);
+class AppDrawer extends StatefulWidget {
+  final List<dynamic> transactions;
+  final List<dynamic> transaksi;
+
+  const AppDrawer({
+    Key? key,
+    required this.transactions,
+    required this.transaksi,
+  }) : super(key: key);
+
+  @override
+  _AppDrawerState createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer> {
+  String? email;
+
+  @override
+  void initState() {
+    super.initState();
+    _getEmail();
+  }
+
+  Future<void> _getEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      email = prefs.getString('email');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,66 +37,62 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 77, 70, 218),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 20.0, bottom: 20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Kelompok 2',
-                    style: TextStyle(
-                      color: Color.fromRGBO(255, 255, 255, 1.0),
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'kelompok2@gmail.com',
-                    style: TextStyle(
-                      color: Color.fromRGBO(255, 255, 255, 1.0),
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+          UserAccountsDrawerHeader(
+            accountName: const Text(
+              'Kelompok 2',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
               ),
             ),
+            accountEmail: Text(
+              email ?? 'Loading...', // Display the email or a placeholder
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+              ),
+            ),
+            currentAccountPicture: const CircleAvatar(
+              backgroundImage: AssetImage('assets/images/wa.jpg'),
+            ),
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 77, 70, 218),
+            ),
           ),
           ListTile(
-            leading: Icon(Icons.movie),
-            title: Text('Film'),
+            leading: const Icon(Icons.movie),
+            title: const Text('Film'),
             onTap: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => FilmPage()),
-              );
+              Navigator.of(context).pushReplacementNamed('/films');
             },
           ),
           ListTile(
-            leading: Icon(Icons.edit),
-            title: Text('Tambah Film'),
+            leading: const Icon(Icons.edit),
+            title: const Text('Tambah Film'),
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => FilmForm(),
-                ),
-              );
+              Navigator.of(context).pushNamed('/films');
             },
           ),
-          Divider(), // Add a divider between the menu items and the logout option
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            leading: const Icon(Icons.history),
+            title: const Text('Data Transaksi'),
             onTap: () {
-              // Navigate to the login page and remove all previous routes
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => LoginPage()),
-                (route) => false,
-              );
+              Navigator.of(context).pushReplacementNamed('/transactions');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.data_usage),
+            title: const Text('Data Master'),
+            onTap: () {
+              Navigator.of(context).pushReplacementNamed('/data_master');
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            onTap: () {
+              _logout(context); // Call logout function
             },
           ),
         ],
@@ -82,8 +100,14 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token'); // Hapus token autentikasi
+  void _logout(BuildContext context) {
+    // Clear authentication token or perform logout operations
+    // Here you can add code to clear user session or token
+    // For example, using shared preferences:
+    // final prefs = await SharedPreferences.getInstance();
+    // await prefs.remove('auth_token');
+
+    // Navigate to login screen and remove all previous routes
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
   }
 }

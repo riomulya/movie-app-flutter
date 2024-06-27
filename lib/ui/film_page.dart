@@ -19,19 +19,22 @@ class _FilmPageState extends State<FilmPage> {
   late List<Film> _films = [];
   late List<Film> _filteredFilms = [];
   final TextEditingController _searchController = TextEditingController();
-  bool _isLoading = false; // Tambahkan variabel _isLoading
-
+  String? email;
   @override
   void initState() {
     super.initState();
     _fetchFilms();
+    _getEmail();
+  }
+
+  Future<void> _getEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      email = prefs.getString('email');
+    });
   }
 
   Future<void> _fetchFilms() async {
-    setState(() {
-      _isLoading = true; // Set _isLoading ke true saat mulai fetch
-    });
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('idToken');
@@ -59,6 +62,7 @@ class _FilmPageState extends State<FilmPage> {
               genre: data['genre'],
               imgUrl: data['imgUrl'],
               dateMovie: data['dateMovie'],
+              price: data['price'] ?? 0,
             );
           }).toList();
 
@@ -73,18 +77,10 @@ class _FilmPageState extends State<FilmPage> {
       }
     } catch (e) {
       print('Error fetching films: $e');
-    } finally {
-      setState(() {
-        _isLoading = false; // Set _isLoading ke false setelah fetch selesai
-      });
     }
   }
 
   Future<void> _deleteFilm(Film film) async {
-    setState(() {
-      _isLoading = true; // Set _isLoading ke true saat mulai delete
-    });
-
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('idToken');
     print("Token : ${token}");
@@ -104,16 +100,9 @@ class _FilmPageState extends State<FilmPage> {
     } else {
       throw Exception('Failed to delete film');
     }
-    setState(() {
-      _isLoading = false; // Set _isLoading ke false setelah delete selesai
-    });
   }
 
   Future<void> _addFilm(Film film) async {
-    setState(() {
-      _isLoading = true; // Set _isLoading ke true saat mulai add
-    });
-
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('idToken');
     final response = await http.post(
@@ -128,6 +117,7 @@ class _FilmPageState extends State<FilmPage> {
         'description': film.description,
         'dateMovie': film.dateMovie,
         'genre': film.genre,
+        "price": film.price
       }),
     );
 
@@ -139,53 +129,56 @@ class _FilmPageState extends State<FilmPage> {
     } else {
       throw Exception('Failed to add film');
     }
-    setState(() {
-      _isLoading = false; // Set _isLoading ke false setelah add selesai
-    });
   }
 
   Future<void> _editFilm(Film film) async {
-    setState(() {
-      _isLoading = true; // Set _isLoading ke true saat mulai edit
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('idToken');
+      // print("Token : ${token}");
+      final response = await http.put(
+        Uri.parse(
+            'https://rio-api-movie-flutter.vercel.app/updateMovie/${film.id}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Cookie': 'authToken=${token}',
+        },
+        body: jsonEncode({
+          'imgUrl': film.imgUrl,
+          'title': film.title,
+          'description': film.description,
+          'dateMovie': film.dateMovie,
+          'genre': film.genre,
+          'price': film.price?.toInt()
+        }),
+      );
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('idToken');
-    // print("Token : ${token}");
-    final response = await http.put(
-      Uri.parse(
-          'https://rio-api-movie-flutter.vercel.app/updateMovie/${film.id}'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Cookie': 'authToken=${token}',
-      },
-      body: jsonEncode({
-        'imgUrl': film.imgUrl,
-        'title': film.title,
-        'description': film.description,
-        'dateMovie': film.dateMovie,
-        'genre': film.genre,
-      }),
-    );
+      String jsonsDataString = response.body
+          .toString(); // toString of Response's body is assigned to jsonDataString
 
-    String jsonsDataString = response.body
-        .toString(); // toString of Response's body is assigned to jsonDataString
-
-    print(jsonsDataString);
-    if (response.statusCode == 200) {
-      setState(() {
-        int index = _films.indexWhere((f) => f.id == film.id);
-        if (index != -1) {
-          _films[index] = film;
-          _filteredFilms = _films;
-        }
-      });
-    } else {
-      throw Exception('Failed to edit film');
+      print(jsonsDataString);
+      if (response.statusCode == 200) {
+        setState(() {
+          int index = _films.indexWhere((f) => f.id == film.id);
+          if (index != -1) {
+            _films[index] = film;
+            _filteredFilms = _films;
+          }
+        });
+      }
+    } catch (e) {
+      print(e);
     }
-    setState(() {
-      _isLoading = false; // Set _isLoading ke false setelah edit selesai
-    });
+  }
+
+  void _logout() async {
+    // Clear authentication token or perform logout operations
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('idToken');
+    await prefs.remove('email');
+
+    // Navigate to login screen and remove all previous routes
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
   }
 
   @override
@@ -193,7 +186,7 @@ class _FilmPageState extends State<FilmPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'List Film',
+          'FIlM APP',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -201,44 +194,51 @@ class _FilmPageState extends State<FilmPage> {
         ),
         backgroundColor: Colors.indigo,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              child: const Icon(Icons.add_circle, size: 26.0),
-              onTap: () async {
-                final Film? newFilm = await Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => FilmForm()));
+          if (email != "riomulya06@gmail.com")
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              color: Colors.white,
+              onPressed: _logout,
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.add_circle),
+              onPressed: () async {
+                final Film? newFilm = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FilmForm()),
+                );
                 if (newFilm != null) {
                   _addFilm(newFilm);
                 }
               },
             ),
-          )
         ],
       ),
-      drawer: const AppDrawer(),
-      body: _isLoading
-          ? Center(
-              child:
-                  CircularProgressIndicator(), // Menampilkan loading animation saat _isLoading true
+      drawer: email == "riomulya06@gmail.com"
+          ? const AppDrawer(
+              transaksi: [],
+              transactions: [],
             )
-          : Column(
-              children: [
-                _buildSearchBar(),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _filteredFilms.length,
-                    itemBuilder: (context, index) {
-                      return ItemFilm(
-                        film: _filteredFilms[index],
-                        onDelete: () => _deleteFilm(_filteredFilms[index]),
-                        onEdit: _editFilm,
-                      );
-                    },
-                  ),
-                ),
-              ],
+          : null,
+      body: Column(
+        children: [
+          _buildSearchBar(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredFilms.length,
+              itemBuilder: (context, index) {
+                return ItemFilm(
+                  film: _filteredFilms[index],
+                  onDelete: () => _deleteFilm(_filteredFilms[index]),
+                  onEdit: _editFilm,
+                );
+              },
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -344,6 +344,14 @@ class ItemFilm extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "RP " + film.price.toString(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 4),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:film_app/models/film.dart';
 import 'package:film_app/ui/film_form.dart';
+import 'package:film_app/ui/data_transaksi_page.dart';
 import 'package:film_app/utils/drawer_widget.dart';
 
 class FilmDetail extends StatefulWidget {
@@ -24,33 +25,25 @@ class _FilmDetailState extends State<FilmDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        title: const Text('Detail Film'),
+        backgroundColor: Colors.indigo, // Warna latar belakang AppBar
+        title: const Text(
+          'Detail Film',
+          style: TextStyle(
+            color: Colors.white, // Warna teks AppBar
+          ),
+        ),
       ),
-      drawer: const AppDrawer(), // Integrate the drawer
-      body: Center(
+      drawer: const AppDrawer(
+        transactions: [],
+        transaksi: [],
+      ),
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              "Judul : ${widget.film?.title ?? 'N/A'}",
-              style: const TextStyle(fontSize: 20.0),
-            ),
-            Text(
-              "Deskripsi : ${widget.film?.description ?? 'N/A'}",
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            Text(
-              "Genre : ${widget.film?.genre ?? 'N/A'}",
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            Text(
-              "Tanggal Rilis : ${_formatDate(widget.film?.dateMovie) ?? 'N/A'}",
-              style: const TextStyle(fontSize: 18.0),
-            ),
-            const SizedBox(height: 20),
+            _buildFilmHeader(),
+            _buildFilmDetails(),
+            _buildBuyTicketButton(),
             _buildEditDeleteButtons(),
           ],
         ),
@@ -58,52 +51,179 @@ class _FilmDetailState extends State<FilmDetail> {
     );
   }
 
+  Widget _buildFilmHeader() {
+    return Stack(
+      children: [
+        Container(
+          height: 250,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(
+                  widget.film?.imgUrl ?? 'https://picsum.photos/640/480'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Container(
+          height: 250,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.black54, Colors.black26],
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          left: 10,
+          child: Text(
+            widget.film?.title ?? 'N/A',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilmDetails() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        elevation: 5,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow("Deskripsi", widget.film?.description ?? 'N/A'),
+              _buildDetailRow("Genre", widget.film?.genre ?? 'N/A'),
+              _buildDetailRow("Tanggal Rilis",
+                  _formatDate(widget.film?.dateMovie) ?? 'N/A'),
+              _buildDetailRow("Harga",
+                  "Rp ${widget.film?.price?.toStringAsFixed(0) ?? 'N/A'}"),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Text(
+            "$label : ",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String? _formatDate(String? dateStr) {
     if (dateStr == null) return null;
-    // Ubah format tanggal ke format yang diinginkan di sini
-    // Misalnya, dari format 'yyyy-MM-dd' menjadi 'dd MMMM yyyy'
-    // Tambahkan logika sesuai dengan kebutuhan aplikasi Anda
-    return dateStr; // Contoh: Kembalikan tanggal tanpa perubahan
+    return dateStr;
   }
 
   Widget _buildEditDeleteButtons() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Tombol Edit
-        OutlinedButton(
-          style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-          ),
-          onPressed: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FilmForm(film: widget.film),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
               ),
-            );
-            if (result != null && result is Film) {
-              widget.onEdit(result);
-              Navigator.pop(context); // Kembali ke halaman utama setelah edit
-            }
-          },
-          child: const Text("Edit"),
-        ),
-        const SizedBox(width: 16), // Spasi antar tombol
-        // Tombol Hapus
-        OutlinedButton(
-          style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+            ),
+            icon: Icon(Icons.edit),
+            label: Text("Edit"),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FilmForm(film: widget.film),
+                ),
+              );
+              if (result != null && result is Film) {
+                widget.onEdit(result);
+                Navigator.pop(context); // Kembali ke halaman utama setelah edit
+              }
+            },
           ),
-          onPressed: () {
-            widget.onDelete();
-            Navigator.pop(context); // Kembali ke halaman utama setelah hapus
-          },
-          child: const Text("Hapus"),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+            ),
+            icon: Icon(Icons.delete),
+            label: Text("Hapus"),
+            onPressed: () {
+              widget.onDelete();
+              Navigator.pop(context); // Kembali ke halaman utama setelah hapus
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBuyTicketButton() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.green,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
         ),
-      ],
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DataTransaksiPage(
+                film: widget.film,
+                transaksi: [],
+                transakasi: [],
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Text(
+            "Buy Ticket",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

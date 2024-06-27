@@ -16,7 +16,8 @@ class _FilmFormState extends State<FilmForm> {
   late TextEditingController _descriptionController;
   late TextEditingController _dateMovieController;
   late TextEditingController _genreController;
-  late TextEditingController _imgUrlController; // Tambahkan ini
+  late TextEditingController _imgUrlController;
+  late TextEditingController _priceController;
 
   @override
   void initState() {
@@ -27,8 +28,9 @@ class _FilmFormState extends State<FilmForm> {
     _dateMovieController =
         TextEditingController(text: widget.film?.dateMovie ?? '');
     _genreController = TextEditingController(text: widget.film?.genre ?? '');
-    _imgUrlController =
-        TextEditingController(text: widget.film?.imgUrl ?? ''); // Inisialisasi
+    _imgUrlController = TextEditingController(text: widget.film?.imgUrl ?? '');
+    _priceController =
+        TextEditingController(text: widget.film!.price.toString());
   }
 
   @override
@@ -37,7 +39,8 @@ class _FilmFormState extends State<FilmForm> {
     _descriptionController.dispose();
     _dateMovieController.dispose();
     _genreController.dispose();
-    _imgUrlController.dispose(); // Dispose
+    _imgUrlController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 
@@ -45,7 +48,13 @@ class _FilmFormState extends State<FilmForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.film == null ? 'Tambah Film' : 'Edit Film'),
+        backgroundColor: Colors.indigo, // Warna latar belakang AppBar
+        title: Text(
+          widget.film == null ? 'Tambah Film' : 'Edit Film',
+          style: TextStyle(
+            color: Colors.white, // Warna teks AppBar
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,8 +63,7 @@ class _FilmFormState extends State<FilmForm> {
           child: Column(
             children: [
               TextFormField(
-                controller:
-                    _imgUrlController, // Gunakan controller yang baru ditambahkan
+                controller: _imgUrlController,
                 decoration: InputDecoration(labelText: 'URL Gambar'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -104,6 +112,21 @@ class _FilmFormState extends State<FilmForm> {
                   return null;
                 },
               ),
+              TextFormField(
+                controller: _priceController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: 'Harga'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Harga tidak boleh kosong';
+                  }
+                  double? price = double.tryParse(value);
+                  if (price == null || price <= 0) {
+                    return 'Harga harus merupakan angka positif';
+                  }
+                  return null;
+                },
+              ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
@@ -114,8 +137,8 @@ class _FilmFormState extends State<FilmForm> {
                       description: _descriptionController.text,
                       dateMovie: _dateMovieController.text,
                       genre: _genreController.text,
-                      imgUrl: _imgUrlController
-                          .text, // Ambil nilai dari controller baru
+                      imgUrl: _imgUrlController.text,
+                      price: int.parse(_priceController.text),
                     );
                     Navigator.pop(context, updatedFilm);
                   }
