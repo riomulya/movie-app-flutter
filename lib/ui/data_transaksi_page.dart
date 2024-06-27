@@ -37,8 +37,6 @@ class _DataTransaksiPageState extends State<DataTransaksiPage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-
-    // _quantityController = TextEditingController(text: '1');
   }
 
   @override
@@ -95,31 +93,6 @@ class _DataTransaksiPageState extends State<DataTransaksiPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // _buildTextField(
-              //   controller: _nameController,
-              //   labelText: 'Nama Pembeli',
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Nama Pembeli tidak boleh kosong';
-              //     }
-              //     return null;
-              //   },
-              // ),
-              // _buildTextField(
-              //   controller: _quantityController,
-              //   labelText: 'Jumlah Tiket',
-              //   keyboardType: TextInputType.number,
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Jumlah Tiket tidak boleh kosong';
-              //     }
-              //     int? quantity = int.tryParse(value);
-              //     if (quantity == null || quantity <= 0) {
-              //       return 'Jumlah Tiket harus merupakan angka positif';
-              //     }
-              //     return null;
-              //   },
-              // ),
               const SizedBox(height: 20),
               // Display selected seats
               Wrap(
@@ -346,53 +319,5 @@ class _DataTransaksiPageState extends State<DataTransaksiPage> {
     } catch (e) {
       print('Error: $e');
     }
-    // await DotEnv.DotEnv.load();
-    // // Fetch the redirect URL from your API response
-    // var controller = WebViewController()
-    //   ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    //   ..setBackgroundColor(const Color(0x00000000))
-    //   ..setNavigationDelegate(
-    //     NavigationDelegate(
-    //       onProgress: (int progress) {
-    //         // Update loading bar.
-    //       },
-    //       onPageStarted: (String url) {},
-    //       onPageFinished: (String url) {},
-    //       onHttpError: (HttpResponseError error) {},
-    //       onWebResourceError: (WebResourceError error) {},
-    //     ),
-    //   )
-    //   ..loadRequest(Uri.parse(redirectUrl));
-    // WebViewWidget(controller: controller);
-
-    // await Navigator.push(
-    // context,
-    // MaterialPageRoute(
-    // builder: (context) => _midtrans?.startPaymentUiFlow(token: token),
-    // ),
-    // );
-    // Handle case where redirectUrl is empty
-    // showDialog(
-    //   context: context,
-    //   builder: (context) => AlertDialog(
-    //     title: Text('Error'),
-    //     content: Text('Failed to retrieve redirect URL from API response.'),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () => Navigator.pop(context),
-    //         child: Text('OK'),
-    //       ),
-    //     ],
-    //   ),
-    // );
-    // }
   }
-
-  // void _clearForm() {
-  //   _nameController.clear();
-  //   _quantityController.text = '1'; // Reset quantity to default value
-  //   setState(() {
-  //     selectedSeats.clear(); // Clear selected seats
-  //   });
-  // }
 }

@@ -14,37 +14,79 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
   final _namaTextboxController = TextEditingController();
   final _emailTextboxController = TextEditingController();
   final _passwordTextboxController = TextEditingController();
+  final _passwordKonfirmasiTextboxController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registrasi'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _namaTextField(),
-                _emailTextField(),
-                _passwordTextField(),
-                _passwordKonfirmasiTextField(),
-                _buttonRegistrasi(),
-              ],
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF2193b0), Color(0xFF6dd5ed)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
           ),
-        ),
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  elevation: 8.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Registrasi',
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _namaTextField(),
+                          const SizedBox(height: 10),
+                          _emailTextField(),
+                          const SizedBox(height: 10),
+                          _passwordTextField(),
+                          const SizedBox(height: 10),
+                          _passwordKonfirmasiTextField(),
+                          const SizedBox(height: 20),
+                          _buttonRegistrasi(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _namaTextField() {
     return TextFormField(
-      decoration: const InputDecoration(labelText: 'Nama'),
+      decoration: InputDecoration(
+        labelText: 'Nama',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        prefixIcon: Icon(Icons.person),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
       keyboardType: TextInputType.text,
       controller: _namaTextboxController,
       validator: (value) {
@@ -58,7 +100,15 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
 
   Widget _emailTextField() {
     return TextFormField(
-      decoration: const InputDecoration(labelText: 'Email'),
+      decoration: InputDecoration(
+        labelText: 'Email',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        prefixIcon: Icon(Icons.email),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
       keyboardType: TextInputType.emailAddress,
       controller: _emailTextboxController,
       validator: (value) {
@@ -78,7 +128,15 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
 
   Widget _passwordTextField() {
     return TextFormField(
-      decoration: const InputDecoration(labelText: 'Password'),
+      decoration: InputDecoration(
+        labelText: 'Password',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        prefixIcon: Icon(Icons.lock),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
       keyboardType: TextInputType.text,
       obscureText: true,
       controller: _passwordTextboxController,
@@ -93,9 +151,18 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
 
   Widget _passwordKonfirmasiTextField() {
     return TextFormField(
-      decoration: const InputDecoration(labelText: 'Konfirmasi Password'),
+      decoration: InputDecoration(
+        labelText: 'Konfirmasi Password',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        prefixIcon: Icon(Icons.lock),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
       keyboardType: TextInputType.text,
       obscureText: true,
+      controller: _passwordKonfirmasiTextboxController,
       validator: (value) {
         if (value != _passwordTextboxController.text) {
           return 'Konfirmasi Password tidak sama';
@@ -108,7 +175,15 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
   Widget _buttonRegistrasi() {
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+        backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF2193b0)),
+        padding: MaterialStateProperty.all<EdgeInsets>(
+          EdgeInsets.symmetric(horizontal: 50.0, vertical: 15.0),
+        ),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
       ),
       child: const Text('Registrasi', style: TextStyle(color: Colors.white)),
       onPressed: () {
@@ -134,16 +209,11 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
     );
 
     if (response.statusCode == 201) {
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registrasi berhasil!')),
       );
-      // Navigate to login page
       Navigator.pop(context);
     } else {
-      // If the server did not return a 201 CREATED response,
-      // then throw an exception.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registrasi gagal!')),
       );

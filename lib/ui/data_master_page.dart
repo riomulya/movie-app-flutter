@@ -1,7 +1,19 @@
-// lib/data_master_page.dart
 import 'package:flutter/material.dart';
 
-class DataMasterPage extends StatelessWidget {
+class DataMasterPage extends StatefulWidget {
+  const DataMasterPage({Key? key}) : super(key: key);
+
+  @override
+  _DataMasterPageState createState() => _DataMasterPageState();
+}
+
+class _DataMasterPageState extends State<DataMasterPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Lakukan inisialisasi state jika diperlukan
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

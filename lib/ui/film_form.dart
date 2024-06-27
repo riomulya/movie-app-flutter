@@ -30,7 +30,7 @@ class _FilmFormState extends State<FilmForm> {
     _genreController = TextEditingController(text: widget.film?.genre ?? '');
     _imgUrlController = TextEditingController(text: widget.film?.imgUrl ?? '');
     _priceController =
-        TextEditingController(text: widget.film!.price.toString());
+        TextEditingController(text: widget.film?.price.toString() ?? '');
   }
 
   @override
@@ -48,23 +48,23 @@ class _FilmFormState extends State<FilmForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.indigo, // Warna latar belakang AppBar
+        backgroundColor: Colors.indigo,
         title: Text(
           widget.film == null ? 'Tambah Film' : 'Edit Film',
           style: TextStyle(
-            color: Colors.white, // Warna teks AppBar
+            color: Colors.white,
           ),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
+              _buildTextField(
                 controller: _imgUrlController,
-                decoration: InputDecoration(labelText: 'URL Gambar'),
+                labelText: 'URL Gambar',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'URL Gambar tidak boleh kosong';
@@ -72,9 +72,9 @@ class _FilmFormState extends State<FilmForm> {
                   return null;
                 },
               ),
-              TextFormField(
+              _buildTextField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Judul'),
+                labelText: 'Judul',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Judul tidak boleh kosong';
@@ -82,9 +82,9 @@ class _FilmFormState extends State<FilmForm> {
                   return null;
                 },
               ),
-              TextFormField(
+              _buildTextField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Deskripsi'),
+                labelText: 'Deskripsi',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Deskripsi tidak boleh kosong';
@@ -92,9 +92,9 @@ class _FilmFormState extends State<FilmForm> {
                   return null;
                 },
               ),
-              TextFormField(
+              _buildTextField(
                 controller: _dateMovieController,
-                decoration: InputDecoration(labelText: 'Tanggal Tayang'),
+                labelText: 'Tanggal Tayang',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Tanggal Tayang tidak boleh kosong';
@@ -102,9 +102,9 @@ class _FilmFormState extends State<FilmForm> {
                   return null;
                 },
               ),
-              TextFormField(
+              _buildTextField(
                 controller: _genreController,
-                decoration: InputDecoration(labelText: 'Genre'),
+                labelText: 'Genre',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Genre tidak boleh kosong';
@@ -112,10 +112,10 @@ class _FilmFormState extends State<FilmForm> {
                   return null;
                 },
               ),
-              TextFormField(
+              _buildTextField(
                 controller: _priceController,
+                labelText: 'Harga',
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: 'Harga'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Harga tidak boleh kosong';
@@ -127,7 +127,7 @@ class _FilmFormState extends State<FilmForm> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -143,11 +143,48 @@ class _FilmFormState extends State<FilmForm> {
                     Navigator.pop(context, updatedFilm);
                   }
                 },
-                child: Text(widget.film == null ? 'Tambah' : 'Simpan'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  backgroundColor: Colors.indigo,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+                child: Text(
+                  widget.film == null ? 'Tambah' : 'Simpan',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    TextInputType keyboardType = TextInputType.text,
+    required String? Function(String?) validator,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+        validator: validator,
       ),
     );
   }

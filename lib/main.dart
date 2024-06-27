@@ -1,3 +1,5 @@
+import 'package:film_app/ui/data_master_page.dart';
+import 'package:film_app/ui/transaksi_list.dart';
 import 'package:flutter/material.dart';
 import 'package:film_app/ui/login_page.dart';
 import 'package:film_app/ui/registrasi_page.dart';
@@ -22,6 +24,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegistrasiPage(),
         '/films': (context) => const FilmPage(),
+        '/data_master': (context) => const DataMasterPage(),
+        '/transactions': (context) => TransactionListPage(),
       },
     );
   }

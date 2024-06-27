@@ -20,6 +20,7 @@ class _FilmPageState extends State<FilmPage> {
   late List<Film> _filteredFilms = [];
   final TextEditingController _searchController = TextEditingController();
   String? email;
+
   @override
   void initState() {
     super.initState();
@@ -186,7 +187,7 @@ class _FilmPageState extends State<FilmPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'FIlM APP',
+          'Film App',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
