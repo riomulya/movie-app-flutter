@@ -16,7 +16,7 @@ class TransactionService {
 
         List<Transaction> transactions = [];
         data.forEach((key, value) {
-          transactions.add(Transaction.fromJson(key, value));
+          transactions.add(Transaction.fromJson(value));
         });
 
         return transactions;
@@ -25,6 +25,32 @@ class TransactionService {
       }
     } catch (e) {
       throw Exception('Error: $e');
+    }
+  }
+
+  Future<List<Transaction>> searchTransactions(
+      String startDate, String endDate) async {
+    final url =
+        Uri.parse('https://rio-api-movie-flutter.vercel.app/searchTransaction');
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'startDate': startDate,
+        'endDate': endDate,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonResponse = jsonDecode(response.body);
+      List<Transaction> transactions = jsonResponse.map((transactionData) {
+        return Transaction.fromJson(transactionData);
+      }).toList();
+      return transactions;
+    } else {
+      throw Exception('Failed to load transactions');
     }
   }
 }

@@ -65,7 +65,7 @@ class KwitansiPage extends StatelessWidget {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => FilmPage(),
+                        builder: (context) => const FilmPage(),
                       ),
                       (Route<dynamic> route) => false,
                     );

@@ -135,41 +135,64 @@ class _DataTransaksiPageState extends State<DataTransaksiPage> {
 
   List<Widget> _buildSeatButtons() {
     List<Widget> seatButtons = [];
-    // Example: Create 30 seats (5x6 grid)
+
     for (int i = 1; i <= 30; i++) {
       String seatNumber = 'Seat $i';
       seatButtons.add(
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              if (selectedSeats.contains(seatNumber)) {
-                selectedSeats.remove(seatNumber);
-              } else {
-                selectedSeats.add(seatNumber);
-              }
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: selectedSeats.contains(seatNumber)
-                ? Colors.redAccent
-                : Colors.blueAccent,
-            padding: const EdgeInsets.all(12.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
+        SizedBox(
+          width: 40.0,
+          height: 40.0,
+          child: ElevatedButton(
+            onPressed: () {
+              setState(() {
+                if (selectedSeats.contains(seatNumber)) {
+                  selectedSeats.remove(seatNumber);
+                } else {
+                  selectedSeats.add(seatNumber);
+                }
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: selectedSeats.contains(seatNumber)
+                  ? Colors.redAccent
+                  : Colors.blueAccent,
+              padding: EdgeInsets.all(2.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
             ),
-          ),
-          child: Text(
-            seatNumber,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
+            child: Center(
+              child: Text(
+                seatNumber,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
             ),
           ),
         ),
       );
     }
-    return seatButtons;
+
+    return List.generate(
+      (seatButtons.length / 5).ceil(),
+      (index) => GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 5,
+          childAspectRatio: 1.0,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+        ),
+        itemCount: 5,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemBuilder: (context, columnIndex) {
+          return seatButtons[index * 5 + columnIndex];
+        },
+      ),
+    );
   }
 
   Widget _buildTextField({
